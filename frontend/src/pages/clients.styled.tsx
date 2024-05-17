@@ -44,3 +44,7 @@ export const AddClientDiv = styled.div`
     justify-content: center;
   }
 `;
+
+export const ClientsListWrapper = styled.div`
+background-color: pink;
+`

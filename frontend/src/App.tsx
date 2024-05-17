@@ -13,6 +13,7 @@ import { PrivateRoute } from "./routes/routes.private";
 import { Dashboard } from "./routes/Dashboard";
 import { Clients } from "./routes/Clients";
 import { RegisterFoodIntake } from "./routes/RegisterFoodIntake";
+import { ClientsProvider } from "./contexts/ClientContext";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -35,7 +36,7 @@ const router = createBrowserRouter(
         }
       />
         <Route
-        path="/nutritrack/registerfoodintake"
+        path="/nutritrack/registerfoodintake/:clientId"
         element={
           <PrivateRoute>
             <RegisterFoodIntake />
@@ -57,9 +58,9 @@ function App() {
   }, [dispatch]);
 
   return (
-    <>
+    <ClientsProvider>
       <RouterProvider router={router} />
-    </>
+    </ClientsProvider>
   );
 }
 

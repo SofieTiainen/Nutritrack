@@ -1,10 +1,11 @@
-const router = express.Router();
 import express from "express";
 import Client from "../models/Client.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 import "../config/db.js";
+
+const router = express.Router();
 
 const authenticateToken = (req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
@@ -18,14 +19,27 @@ const authenticateToken = (req, res, next) => {
 };
 
 router.post("/clients", authenticateToken, async (req, res) => {
-  console.log("req", req);
-  const { firstName, lastName, email } = req.body;
-  console.log("firstname", firstName);
+  const { firstName, lastName, email, gender, ageYears, ageMonths } = req.body;
 
-  if (!firstName || !lastName || !email) {
+  if (!firstName || !lastName || !email || !gender) {
     return res
       .status(400)
-      .json({ error: "First name, last name, and email are required" });
+      .json({ error: "First name, last name, email and gender are required" });
+  }
+  if ((ageYears === undefined || ageYears === null) && (ageMonths === undefined || ageMonths === null)) {
+    return res.status(400).json({ error: 'Either age in years or age in months is required' });
+  }
+
+  if ((ageYears !== undefined && ageYears !== null) && (ageMonths !== undefined && ageMonths !== null)) {
+    return res.status(400).json({ error: 'You can only provide age in years or age in months, not both' });
+  }
+
+  if (ageYears !== undefined && ageYears !== null && (ageYears < 0 || ageYears > 110)) {
+    return res.status(400).json({ error: 'Age in years must be between 0 and 110' });
+  }
+
+  if (ageMonths !== undefined && ageMonths !== null && (ageMonths < 0 || ageMonths > 11)) {
+    return res.status(400).json({ error: 'Age in months must be between 0 and 11' });
   }
 
   try {
@@ -33,6 +47,9 @@ router.post("/clients", authenticateToken, async (req, res) => {
       firstName,
       lastName,
       email,
+      gender,
+      ageYears: ageYears || null,
+      ageMonths: ageMonths || null,
       userId: req.user.userId,
     });
 
