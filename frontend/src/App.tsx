@@ -4,9 +4,6 @@ import {
   RouterProvider,
   Route,
 } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setUserProfile } from "./redux/slices/userSlice";
-import { useEffect } from "react";
 import { Root } from "./routes/Root";
 import { Home } from "./routes/Home";
 import { PrivateRoute } from "./routes/routes.private";
@@ -14,6 +11,7 @@ import { Dashboard } from "./routes/Dashboard";
 import { Clients } from "./routes/Clients";
 import { RegisterFoodIntake } from "./routes/RegisterFoodIntake";
 import { ClientsProvider } from "./contexts/ClientContext";
+import { FoodProvider } from "./contexts/FoodContext";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -48,18 +46,11 @@ const router = createBrowserRouter(
 );
 
 function App() {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    const storedUserProfile = localStorage.getItem("userProfile");
-    if (storedUserProfile) {
-      dispatch(setUserProfile(JSON.parse(storedUserProfile)));
-    }
-  }, [dispatch]);
-
   return (
     <ClientsProvider>
+      <FoodProvider>
       <RouterProvider router={router} />
+      </FoodProvider>
     </ClientsProvider>
   );
 }

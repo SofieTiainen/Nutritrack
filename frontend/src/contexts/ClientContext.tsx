@@ -26,7 +26,6 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
   const fetchClients = async () => {
   const token = sessionStorage.getItem("token");
 
-    //Vi har ej tokenet här 
     try {
       const response = await axios.get("http://localhost:3000/api/clients", {
         headers: {

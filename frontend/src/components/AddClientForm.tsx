@@ -27,7 +27,6 @@ export const AddClientForm = ({ toggleAddClient }: AddClientFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("input", addClientInput);
     setButtonText({
       text: "Add",
       loader: <Loader width="10px" padding="5px" color="white" />,

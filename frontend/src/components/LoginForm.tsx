@@ -12,8 +12,6 @@ import { Colors } from "../styles/colors";
 import { Loader } from "./Loader";
 import axios from "axios";
 
-import { setUserProfile } from "../redux/slices/userSlice";
-import { useDispatch } from "react-redux";
 import { useNavigate } from 'react-router-dom'
 
 
@@ -32,7 +30,6 @@ export const LoginForm = ({ toggleLogin }: LoginFormProps) => {
     passWord: '',
   });
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
 
@@ -53,7 +50,6 @@ export const LoginForm = ({ toggleLogin }: LoginFormProps) => {
         const { firstName, lastName, email } = response.data;
         const userProfile = { firstName, lastName, email };
         localStorage.setItem('userProfile', JSON.stringify(userProfile));
-        dispatch(setUserProfile(userProfile));
         navigate('/nutritrack/dashboard')
       }
 
