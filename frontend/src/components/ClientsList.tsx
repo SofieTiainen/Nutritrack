@@ -65,6 +65,7 @@ import { useNavigate } from "react-router-dom";
 
 export const ClientsList: React.FC = () => {
   const { clientsList } = useClients();
+//   console.log("Clientlist", clientsList)
   const navigate = useNavigate();
 
   const handlePenIconClick = (clientId: string) => {
