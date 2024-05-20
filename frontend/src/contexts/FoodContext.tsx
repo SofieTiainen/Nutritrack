@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
+import React, { createContext, useState, useContext, ReactNode, useEffect, } from "react";
 
 export interface FoodItem {
     id: string;
@@ -7,35 +7,30 @@ export interface FoodItem {
     nummer: number;
 }
 
-export interface DiaryEntry {
+export interface MealEntry {
+    mealType: string;
     food: FoodItem;
     amount: string;
 }
 
+export interface DiaryEntry {
+    date: string;
+    entries: MealEntry[];
+}
+
+
 export interface FoodContextProps {
-    allFoodItems: FoodItem[];
-    searchResults: FoodItem[];
-    foodDiary: DiaryEntry[];
-    isLoading: boolean;
     fetchFoodItems: () => void;
-    setSearchTerm: (term: string) => void;
-    addFoodToDiary: (foodItem: FoodItem, amount: string) => void;
+    allFoodItems: FoodItem[];
 }
 
 const FoodContext = createContext<FoodContextProps | undefined>(undefined);
 
 export const FoodProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [allFoodItems, setAllFoodItems] = useState<FoodItem[]>([]);
-    const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
-    const [foodDiary, setFoodDiary] = useState<DiaryEntry[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [searchTerm, setSearchTerm] = useState<string>("");
-    const [hasFetched, setHasFetched] = useState(false); 
 
 
     const fetchFoodItems = async () => {
-        if (hasFetched) return;
-        setIsLoading(true);
         let allResults: FoodItem[] = [];
         let offset = 0;
         const limit = 20;
@@ -59,44 +54,22 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 }
             }
             setAllFoodItems(allResults);
-            setHasFetched(true);
 
         } catch (error) {
             console.log("Error fetching livsmedel: ", error)
-        } finally {
-            setIsLoading(false);
-        }
+        } 
     };
 
     useEffect(() => {
-        if(searchTerm) {
-            const terms = searchTerm.toLowerCase().split(" ");
-            const results = allFoodItems.filter((food) => 
-            terms.every((term) => food.namn.toLowerCase().includes(term)));
-            setSearchResults(results);
-        } else {
-            setSearchResults([]);
-        }
-    }, [searchTerm, allFoodItems]);
+        fetchFoodItems();
+    }, [])
 
-    const addFoodToDiary = (foodItem: FoodItem, amount: string) => {
-        const newEntry: DiaryEntry = {
-            food: foodItem, 
-            amount,
-        };
-        setFoodDiary((prevDiary) => [...prevDiary, newEntry]);
-    }
 
     return (
         <FoodContext.Provider
         value={{
             allFoodItems,
-            searchResults,
-            foodDiary,
-            isLoading,
             fetchFoodItems,
-            setSearchTerm,
-            addFoodToDiary
         }}
         >
             {children}

@@ -9,6 +9,22 @@ interface Client {
   gender: string;
   ageYears: number | null;
   ageMonths: number | null;
+  createdAt: string;
+}
+
+interface Day {
+  date: string;
+  mealTypes: {
+    name: string;
+    foods: { item: any; amount: string }[];
+  }[];
+}
+
+interface FoodDiary {
+  _id: string;
+  clientId: Client;
+  days: Day[];
+  createdAt: string;
 }
 
 interface ClientsContextProps {
@@ -16,12 +32,15 @@ interface ClientsContextProps {
   fetchClients: () => void;
   addClient: (newClient: Client) => void;
   getClientById: (id: string) => Client | undefined;
+  foodDiaries: FoodDiary[];
+  fetchFoodDiaries: () => void;
 }
 
 const ClientsContext = createContext<ClientsContextProps | undefined>(undefined);
 
 export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [clientsList, setClientsList] = useState<Client[]>([]);
+  const [foodDiaries, setFoodDiaries] = useState<FoodDiary[]>([]);
 
   const fetchClients = async () => {
   const token = sessionStorage.getItem("token");
@@ -41,6 +60,24 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
+  const fetchFoodDiaries = async () => {
+    const token = sessionStorage.getItem("token");
+
+    try {
+      const response = await axios.get("http://localhost:3000/api/foodDiaries", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        setFoodDiaries(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching food diaries", error);
+    }
+  };
+
   const addClient = (newClient: Client) => {
     setClientsList((prevClients) => [...prevClients, newClient]);
   };
@@ -50,7 +87,7 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   return (
-    <ClientsContext.Provider value={{ clientsList, fetchClients, addClient, getClientById }}>
+    <ClientsContext.Provider value={{ clientsList, fetchClients, addClient, getClientById, foodDiaries, fetchFoodDiaries }}>
       {children}
     </ClientsContext.Provider>
   );

@@ -16,10 +16,19 @@ export const StyledLatestClients = styled.div`
 
 `;
 
+export const StyledLatestFoodDiarys = styled.div`
+  background-color: #bfbfbf;
+  height: 400px;
+  width: 100%;
+
+`;
+
 export const StyledLatestNutritionalAnalysis = styled.div`
   background-color: #bfbfbf;
   height: 400px;
   width: 100%;
 
 `;
+
+
 

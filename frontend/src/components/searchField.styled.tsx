@@ -23,7 +23,7 @@ border-radius: 5px;
 
 export const SearchDiv = styled.div`
 display: flex;
-align-items: center;
+flex-direction: column;
 position: relative;
 gap: 10px;
 `

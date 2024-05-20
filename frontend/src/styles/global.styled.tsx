@@ -26,9 +26,9 @@ export const H3 = styled.h3`
   text-align: center;
 `;
 
-export const P = styled.p`
+export const P = styled.p<{$fontSize?:string}>`
   color: black;
-  font-size: 12px;
+  font-size: ${(props) => props.$fontSize || '12px'}
   margin: 0px;
 `;
 

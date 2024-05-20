@@ -20,14 +20,12 @@ const clientSchema = new mongoose.Schema({
   },  
   ageYears: {
     type: Number,
-    // required: true,
     min: 1,
     max: 110,
     default: null,
   },
   ageMonths: {
     type: Number,
-    // required: true,
     min: 0,
     max: 11,
     default: null,
