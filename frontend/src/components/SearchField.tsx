@@ -7,18 +7,29 @@ interface SearchFieldProps {
   dayIndex: number;
   mealIndex: number;
   onAddFood: (dayIndex: number, mealIndex: number, food: FoodItem, amount:string) => void;
+  editFood: {dayIndex: number, mealIndex: number, food: FoodItem, amount: string} | null;
+  setEditFood: (editFood: {dayIndex: number, mealIndex: number, food: FoodItem, amount: string} | null) => void;
 }
 
 export const SearchField: React.FC<SearchFieldProps> = ({
   dayIndex,
   mealIndex,
   onAddFood,
+  editFood,
+  setEditFood
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [amount, setAmount] = useState("");
   const { allFoodItems } = useFood();
+
+  useEffect(() => {
+    if (editFood) {
+      setSelectedFood(editFood.food);
+      setAmount(editFood.amount);
+    }
+  }, [editFood]);
 
   useEffect(() => {
     if (searchTerm.length >= 3) {
@@ -43,6 +54,7 @@ export const SearchField: React.FC<SearchFieldProps> = ({
         onAddFood(dayIndex, mealIndex, selectedFood, amount);
         setSelectedFood(null)
         setAmount("")
+        setEditFood(null);
 
     }
 
@@ -85,7 +97,7 @@ export const SearchField: React.FC<SearchFieldProps> = ({
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Ange mängd i gram"
           />
-          <button onClick={handleAddFood}>Lägg till i matdagbok</button>
+          <button onClick={handleAddFood}>{editFood ? "Uppdatera livsmedel" : "Lägg till i matdagbok"}</button>
         </div>
       )}
     </SearchDiv>

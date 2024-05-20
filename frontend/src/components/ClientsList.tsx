@@ -12,38 +12,53 @@ export const ClientsList: React.FC = () => {
 
   const handlePenIconClick = (clientId: string) => {
     navigate(`/nutritrack/registerfoodintake/${clientId}`);
-  }
+  };
 
   const getFoodDiariesForClient = (clientId: string) => {
-    return foodDiaries.filter(diary => diary.clientId._id === clientId);
+    return foodDiaries.filter((diary) => diary.clientId._id === clientId);
+  };
+
+  const handleGoToDiaryClick = (clientId: string, diaryId: string) => {
+    navigate(`/nutritrack/registerfoodintake/${clientId}/${diaryId}`);
+
   };
 
   useEffect(() => {
     fetchFoodDiaries();
   }, []);
 
-
-
   return (
     <ClientsUl>
       {clientsList.map((client) => (
-        <ClientsLi key={client._id} style={{ color: "black" }} >
+        <ClientsLi key={client._id} style={{ color: "black" }}>
           <div>
-            {client.firstName} {client.lastName} - {client.email} - id: {client._id}{" "} -
-            {client.gender} -
+            {client.firstName} {client.lastName} - {client.email} - id:{" "}
+            {client._id} -{client.gender} -
             {client.ageYears !== null
               ? `${client.ageYears} years`
               : `${client.ageMonths} months`}
           </div>
           <PenIconWrapper>
-            <FaPenToSquare fontSize={"26px"} onClick={() => handlePenIconClick(client._id)} />
+            <FaPenToSquare
+              fontSize={"26px"}
+              onClick={() => handlePenIconClick(client._id)}
+            />
             <P>Skapa ny matdagbok</P>
           </PenIconWrapper>
-          <ul style={{ backgroundColor: 'lightgrey', marginTop: '10px', padding: '10px' }}>
-            {getFoodDiariesForClient(client._id).map(diary => (
+          <ul
+            style={{
+              backgroundColor: "lightgrey",
+              marginTop: "10px",
+              padding: "10px",
+            }}
+          >
+            {getFoodDiariesForClient(client._id).map((diary) => (
               <li key={diary._id}>
-                Matdagbok skapad: {new Date(diary.createdAt).toLocaleDateString()}
-                <button>Gå till matdagbok</button>
+                Matdagbok skapad:{" "}
+                {new Date(diary.createdAt).toLocaleDateString()}
+                <button
+                onClick={() => handleGoToDiaryClick(client._id, diary._id)}
+                >Gå till matdagbok</button>
               </li>
             ))}
           </ul>

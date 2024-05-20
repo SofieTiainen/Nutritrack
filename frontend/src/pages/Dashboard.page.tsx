@@ -2,18 +2,13 @@ import { DashboardWrapper, StyledLatestClients, StyledLatestNutritionalAnalysis,
 import { FlexDiv } from "../styles/global.styled";
 import { H1, P } from "../styles/global.styled";
 import { Colors } from "../styles/colors";
-import { useFood } from "../contexts/FoodContext";
 import { useEffect } from "react";
 import { useClients } from "../contexts/ClientContext";
 
 
 export const DashboardPage = () => {
-  const {fetchFoodItems} = useFood();
   const {fetchClients, clientsList, fetchFoodDiaries, foodDiaries} = useClients();
 
-  useEffect(() => {
-    fetchFoodItems();
-  }, [])
 
   useEffect(() => {
     fetchClients();

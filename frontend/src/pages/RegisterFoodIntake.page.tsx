@@ -4,12 +4,20 @@ import { Colors } from "../styles/colors";
 import { useParams } from "react-router-dom";
 import { useClients } from "../contexts/ClientContext";
 import { FoodDiary } from "../components/FoodDiary";
+import { useFood } from "../contexts/FoodContext";
+import { useEffect } from "react";
 
 
 export const RegisterFoodIntakePage = () => {
   const { clientId } = useParams<{ clientId: string }>();
   const { getClientById } = useClients();
   const client = clientId ? getClientById(clientId) : undefined;
+  const {fetchFoodItems} = useFood();
+
+  useEffect(() => {
+    fetchFoodItems();
+  }, [])
+
 
   return (
     <RegisterIntakeWrapper>
