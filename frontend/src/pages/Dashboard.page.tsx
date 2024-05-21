@@ -9,7 +9,6 @@ import { useClients } from "../contexts/ClientContext";
 export const DashboardPage = () => {
   const {fetchClients, clientsList, fetchFoodDiaries, foodDiaries} = useClients();
 
-
   useEffect(() => {
     fetchClients();
     fetchFoodDiaries();

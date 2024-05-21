@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import {
   Wrapper,
   FoodJournalDiv,
@@ -17,35 +17,37 @@ import { FiPlus } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { LuPlusSquare } from "react-icons/lu";
 import { SearchField } from "./SearchField";
-import { FoodItem } from "../contexts/FoodContext";
-import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useFood } from "../contexts/FoodContext";
+import { useParams, useNavigate } from "react-router-dom";
 import { FaRegEdit } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
-import { useNavigate } from "react-router-dom";
-
-interface Day {
-  date: string;
-  mealTypes: {
-    name: string;
-    foods: { item: FoodItem; amount: string }[];
-  }[];
-}
-
-interface FoodDiary {
-  _id: string;
-  clientId: string;
-  days: Day[];
-}
+import axios from "axios";
 
 export const FoodDiary: React.FC = () => {
   const navigate = useNavigate();
-  const { clientId, diaryId } = useParams<{
-    clientId: string;
-    diaryId?: string;
-  }>();
+  const { clientId, diaryId } = useParams<{ clientId: string; diaryId?: string }>();
   const token = sessionStorage.getItem("token");
-  const [days, setDays] = useState<Day[]>([
+  const { 
+    days, 
+    setDays,
+    hiddenDays,
+    setHiddenDays,
+    activeMeal,
+    setActiveMeal,
+    editFood,
+    setEditFood,
+    addNewDay,
+    handleToggleDay,
+    handleAddFood,
+    handleEditFood,
+    handleRemoveFood,
+    handleAddInBetweenMeal,
+    handleSaveAsDraft,
+    handleGoToNutritionalAnalysis,
+    handleDeleteDiary,
+  } = useFood();
+
+  const initialDays = [
     {
       date: new Date().toISOString().split("T")[0],
       mealTypes: [
@@ -55,63 +57,28 @@ export const FoodDiary: React.FC = () => {
         { name: "Mellanmål 1", foods: [] },
       ],
     },
-  ]);
-
-  const [hiddenDays, setHiddenDays] = useState<boolean[]>([false]);
-  const [activeMeal, setActiveMeal] = useState<{
-    dayIndex: number;
-    mealIndex: number;
-    mealType: string;
-  } | null>(null);
-
-  const [editFood, setEditFood] = useState<{
-    dayIndex: number;
-    mealIndex: number;
-    food: FoodItem;
-    amount: string;
-  } | null>(null);
+  ];
 
   useEffect(() => {
     if (diaryId) {
       const fetchDiary = async () => {
         try {
-          const response = await axios.get(
-            `http://localhost:3000/api/foodDiary/${clientId}/${diaryId}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
+          const response = await axios.get(`http://localhost:3000/api/foodDiary/${clientId}/${diaryId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           setDays(response.data.days);
         } catch (error) {
           console.error("Error fetching diary:", error);
         }
       };
       fetchDiary();
+    } else {
+      // Återställ till initialDays om inget diaryId tillhandahålls
+      setDays(initialDays);
     }
-  }, [diaryId, clientId, token]);
+  }, [diaryId, clientId, token, setDays]);
 
-  const addNewDay = () => {
-    const newDate = new Date();
-    newDate.setDate(newDate.getDate() + days.length);
-
-    const newDay: Day = {
-      date: newDate.toISOString().split("T")[0],
-      mealTypes: [
-        { name: "Frukost", foods: [] },
-        { name: "Lunch", foods: [] },
-        { name: "Middag", foods: [] },
-        { name: "Mellanmål 1", foods: [] },
-      ],
-    };
-    setDays([...days, newDay]);
-    setHiddenDays([...hiddenDays, false]);
-  };
-
-  const handleToggleDay = (index: number) => {
-    setHiddenDays((prevHiddenDays) =>
-      prevHiddenDays.map((hidden, i) => (i === index ? !hidden : hidden))
-    );
-  };
+  const hasValidDays = days.some(day => day.mealTypes.some(meal => meal.foods.length > 0));
 
   const handleDeleteDay = (index: number) => {
     setDays((prevDays) => prevDays.filter((_, i) => i !== index));
@@ -120,11 +87,7 @@ export const FoodDiary: React.FC = () => {
     );
   };
 
-  const handleMealClick = (
-    dayIndex: number,
-    mealIndex: number,
-    mealType: string
-  ) => {
+  const handleMealClick = (dayIndex: number, mealIndex: number, mealType: string) => {
     if (
       activeMeal?.dayIndex === dayIndex &&
       activeMeal?.mealIndex === mealIndex &&
@@ -133,146 +96,6 @@ export const FoodDiary: React.FC = () => {
       setActiveMeal(null);
     } else {
       setActiveMeal({ dayIndex, mealIndex, mealType });
-    }
-  };
-
-  const handleAddInBetweenMeal = (dayIndex: number) => {
-    setDays((prevDays) =>
-      prevDays.map((d, i) => {
-        if (i === dayIndex) {
-          const inBetweenMealCount = d.mealTypes.filter((meal) =>
-            meal.name.startsWith("Mellanmål")
-          ).length;
-          const newMeal = {
-            name: `Mellanmål ${inBetweenMealCount + 1}`,
-            foods: [],
-          };
-          return { ...d, mealTypes: [...d.mealTypes, newMeal] };
-        }
-        return d;
-      })
-    );
-  };
-
-  const handleAddFood = (
-    dayIndex: number,
-    mealIndex: number,
-    food: FoodItem,
-    amount: string
-  ) => {
-    setDays((prevDays) =>
-      prevDays.map((day, i) => {
-        if (i === dayIndex) {
-          return {
-            ...day,
-            mealTypes: day.mealTypes.map((meal, j) => {
-              if (j === mealIndex) {
-                if (
-                  editFood &&
-                  editFood.dayIndex === dayIndex &&
-                  editFood.mealIndex === mealIndex
-                ) {
-                  return {
-                    ...meal,
-                    foods: meal.foods.map((f) =>
-                      f.item.namn === editFood.food.namn
-                        ? { item: food, amount }
-                        : f
-                    ),
-                  };
-                } else {
-                  return {
-                    ...meal,
-                    foods: [...meal.foods, { item: food, amount }],
-                  };
-                }
-              } else {
-                return meal;
-              }
-            }),
-          };
-        } else {
-          return day;
-        }
-      })
-    );
-  };
-
-  const handleSaveAsDraft = async () => {
-    if (clientId) {
-      try {
-        const url = diaryId
-          ? `http://localhost:3000/api/foodDiary/${diaryId}`
-          : "http://localhost:3000/api/foodDiary";
-        const method = diaryId ? "put" : "post";
-        const response = await axios({
-          method,
-          url,
-          data: { clientId, days },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        alert("Matdagbok sparad");
-        console.log("responsen: ", response);
-      } catch (error) {
-        console.error("Error saving food diary:", error);
-      }
-    } else {
-      console.log("No clientID found");
-    }
-  };
-
-  const handleEditFood = (
-    dayIndex: number,
-    mealIndex: number,
-    food: FoodItem,
-    amount: string
-  ) => {
-    setEditFood({ dayIndex, mealIndex, food, amount });
-    setActiveMeal({ dayIndex, mealIndex, mealType: food.namn });
-  };
-
-  const handleRemoveFood = (
-    dayIndex: number,
-    mealIndex: number,
-    foodIndex: number
-  ) => {
-    setDays((prevDays) =>
-      prevDays.map((day, i) =>
-        i === dayIndex
-          ? {
-              ...day,
-              mealTypes: day.mealTypes.map((meal, j) =>
-                j === mealIndex
-                  ? {
-                      ...meal,
-                      foods: meal.foods.filter((_, k) => k !== foodIndex),
-                    }
-                  : meal
-              ),
-            }
-          : day
-      )
-    );
-  };
-
-  const handleDeleteDiary = async () => {
-    console.log("Diaryid", diaryId)
-    if (diaryId) {
-      try {
-        await axios.delete(`http://localhost:3000/api/foodDiary/${diaryId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        alert("Matdagbok raderad");
-        navigate('/nutritrack/dashboard'); 
-      } catch (error) {
-        console.error("Error deleting food diary:", error);
-      }
-    } else {
-      console.log("No diaryID found");
     }
   };
 
@@ -299,11 +122,10 @@ export const FoodDiary: React.FC = () => {
       <FoodJournalWrapper>
         <div>
           <H3 style={{ textAlign: "center" }}>Matdagboken</H3>
+          <button onClick={() => handleGoToNutritionalAnalysis(clientId!, diaryId, token!, navigate)} disabled={!hasValidDays}>Näringsberäkning</button>
           <div>
-            <button onClick={handleSaveAsDraft}>Spara som utkast</button>
-            {diaryId && <button
-            onClick={handleDeleteDiary}
-            >Ta bort hela matdagboken</button>}
+            <button onClick={() => handleSaveAsDraft(clientId!, diaryId, token!)}>Spara som utkast</button>
+            {diaryId && <button onClick={() => handleDeleteDiary(diaryId, token!, navigate)}>Ta bort hela matdagboken</button>}
           </div>
         </div>
 
@@ -324,10 +146,7 @@ export const FoodDiary: React.FC = () => {
             {!hiddenDays[dayIndex] && (
               <OneDayDiv>
                 <div>
-                  <label
-                    htmlFor={`date-${dayIndex}`}
-                    style={{ color: "black" }}
-                  >
+                  <label htmlFor={`date-${dayIndex}`} style={{ color: "black" }}>
                     Datum:
                   </label>
                   <input
@@ -393,10 +212,7 @@ export const FoodDiary: React.FC = () => {
             )}
 
             <TrashCanDiv>
-              <FaRegTrashCan
-                color="black"
-                onClick={() => handleDeleteDay(dayIndex)}
-              />
+              <FaRegTrashCan color="black" onClick={() => handleDeleteDay(dayIndex)} />
             </TrashCanDiv>
           </FoodJournalDiv>
         ))}
@@ -410,3 +226,4 @@ export const FoodDiary: React.FC = () => {
     </Wrapper>
   );
 };
+

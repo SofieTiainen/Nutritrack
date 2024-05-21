@@ -10,9 +10,6 @@ export const Form = styled.form`
   display: flex;
   justify-content: space-around;
   
-
-
-
   @media (min-width: 769px) {
     flex-direction: column;
     justify-content: center;

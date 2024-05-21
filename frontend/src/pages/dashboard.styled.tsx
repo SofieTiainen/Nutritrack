@@ -9,6 +9,7 @@ export const DashboardWrapper = styled.div`
 
 `;
 
+
 export const StyledLatestClients = styled.div`
   background-color: #bfbfbf;
   height: 400px;

@@ -5,7 +5,7 @@ export const ClientsWrapper = styled.div`
   background-color: ${Colors.Gold50};
   margin-bottom: 100px;
   margin-top: 100px;
-  padding: 0px 0px;
+  padding: 0px 50px;
 `;
 
 export const AddClientBtn = styled.button`

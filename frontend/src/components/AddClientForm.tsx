@@ -44,9 +44,8 @@ export const AddClientForm = ({ toggleAddClient }: AddClientFormProps) => {
       );
 
       if (response.status === 201) {
-        console.log("Responsen", response);
         const newClient = response.data;
-        addClient(newClient); // Lägg till klienten i listan
+        addClient(newClient); 
         setAddClientInput({
           firstName: "",
           lastName: "",
