@@ -13,6 +13,7 @@ import { RegisterFoodIntake } from "./routes/RegisterFoodIntake";
 import { ClientsProvider } from "./contexts/ClientContext";
 import { FoodProvider } from "./contexts/FoodContext";
 import { NutritionAnalysis } from "./routes/NutritionAnalysis";
+import { NutritionAnalysisProvider } from "./contexts/NutritionAnalysisContext";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -43,7 +44,7 @@ const router = createBrowserRouter(
         }
       />
         <Route
-        path="/nutritrack/nutritionanalysis/:clientId/:analysisId?"
+        path="/nutritrack/nutritionanalysis/:clientId/:analysisId"
         element={
           <PrivateRoute>
             <NutritionAnalysis />
@@ -58,7 +59,9 @@ function App() {
   return (
     <ClientsProvider>
       <FoodProvider>
+        <NutritionAnalysisProvider>
       <RouterProvider router={router} />
+        </NutritionAnalysisProvider>
       </FoodProvider>
     </ClientsProvider>
   );

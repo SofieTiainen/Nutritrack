@@ -43,18 +43,17 @@ router.get('/livsmedel/nummer', async (req, res) => {
     }
 })
 
-router.get('/livsmedel/nummer/naringsvarden', async (req, res) => {
+
+router.get('/livsmedel/:number/naringsvarden', async (req, res) => {
     const { number } = req.params;
 
     try {
-        const response = await axios.get(`https://dataportal.livsmedelsverket.se/livsmedel/api/v1/livsmedel/${number}/naringsvarden`, {
-        });
-        res.json(response.data)
-
+        const response = await axios.get(`https://dataportal.livsmedelsverket.se/livsmedel/api/v1/livsmedel/${number}/naringsvarden`);
+        res.json(response.data);
     } catch (error) {
         console.log("Error fetching livsmedel: ", error);
         res.status(500).json({ error: 'Error fetching livsmedel' });
     }
-})
+});
 
 export default router;

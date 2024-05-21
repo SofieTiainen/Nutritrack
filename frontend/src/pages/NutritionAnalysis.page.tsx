@@ -1,9 +1,10 @@
-import { NutritionAnalysisWrapper } from "./nutritionAnalysis.styled"
+import { NutritionAnalysisWrapper } from "./nutritionAnalysis.styled";
+import { ShowNutritionAnalysis } from "../components/ShowNutritionAnalysis";
 
 export const NutritionAnalysisPage = () => {
-    return (
-        <NutritionAnalysisWrapper>
-        <h1 style={{color:'black'}}>Näringsberäkning</h1>
-        </NutritionAnalysisWrapper>
-    )
-}
+  return (
+    <NutritionAnalysisWrapper>
+      <ShowNutritionAnalysis></ShowNutritionAnalysis>
+    </NutritionAnalysisWrapper>
+  );
+};

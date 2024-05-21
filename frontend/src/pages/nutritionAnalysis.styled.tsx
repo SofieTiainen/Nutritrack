@@ -5,5 +5,6 @@ export const NutritionAnalysisWrapper = styled.div`
   background-color: ${Colors.Gold50};
   margin-bottom: 100px;
   margin-top: 100px;
-  padding: 0px 0px;
+  padding: 0px 50px;
+  // height: 100vh;
 `;

@@ -1,6 +1,4 @@
 import express from "express";
-import FoodDiary from "../models/FoodDiary.js";
-import Client from "../models/Client.js";
 import NutritionAnalysis from "../models/NutritionAnalysis.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -31,6 +29,21 @@ router.post("/nutritionanalysis", authenticateToken, async (req, res) => {
     res.status(201).json(newNutritionAnalysis);
   } catch (error) {
     console.error('Error saving nutrition analysis:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/nutritionanalysis/:analysisId', authenticateToken, async (req, res) => {
+  const { analysisId } = req.params;
+
+  try {
+    const nutritionAnalysis = await NutritionAnalysis.findById(analysisId).populate('clientId');
+    if (!nutritionAnalysis) {
+      return res.status(404).json({ error: 'Nutrition analysis not found' });
+    }
+    res.status(200).json(nutritionAnalysis);
+  } catch (error) {
+    console.error('Error fetching nutrition analysis:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
