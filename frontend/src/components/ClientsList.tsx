@@ -5,13 +5,48 @@ import { FaPenToSquare } from "react-icons/fa6";
 import { P } from "../styles/global.styled";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import axios from "axios";
 
 export const ClientsList: React.FC = () => {
   const { clientsList, foodDiaries, fetchFoodDiaries } = useClients();
   const navigate = useNavigate();
+  const token = sessionStorage.getItem("token");
 
-  const handlePenIconClick = (clientId: string) => {
-    navigate(`/nutritrack/registerfoodintake/${clientId}`);
+  const initialDays = [
+    {
+      date: new Date().toISOString().split("T")[0],
+      mealTypes: [
+        { name: "Frukost", foods: [] },
+        { name: "Lunch", foods: [] },
+        { name: "Middag", foods: [] },
+        { name: "Mellanmål 1", foods: [] },
+      ],
+    },
+  ];
+
+  const handlePenIconClick = async (clientId: string) => {
+    // navigate(`/nutritrack/registerfoodintake/${clientId}`);
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/foodDiary",
+        { clientId, days: initialDays },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const diaryId = response.data._id;
+      console.log("response", response)
+
+      navigate(`/nutritrack/registerfoodintake/${clientId}/${diaryId}`);
+
+    } catch (error) {
+      console.error("Error creating food diary:", error);
+    }
+
+
   };
 
   const getFoodDiariesForClient = (clientId: string) => {

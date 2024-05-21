@@ -25,7 +25,7 @@ import axios from "axios";
 
 export const FoodDiary: React.FC = () => {
   const navigate = useNavigate();
-  const { clientId, diaryId } = useParams<{ clientId: string; diaryId?: string }>();
+  const { clientId, diaryId } = useParams<{ clientId: string; diaryId: string }>();
   const token = sessionStorage.getItem("token");
   const { 
     days, 
@@ -73,7 +73,6 @@ export const FoodDiary: React.FC = () => {
       };
       fetchDiary();
     } else {
-      // Återställ till initialDays om inget diaryId tillhandahålls
       setDays(initialDays);
     }
   }, [diaryId, clientId, token, setDays]);
@@ -86,6 +85,7 @@ export const FoodDiary: React.FC = () => {
       prevHiddenDays.filter((_, i) => i !== index)
     );
   };
+
 
   const handleMealClick = (dayIndex: number, mealIndex: number, mealType: string) => {
     if (
@@ -122,9 +122,9 @@ export const FoodDiary: React.FC = () => {
       <FoodJournalWrapper>
         <div>
           <H3 style={{ textAlign: "center" }}>Matdagboken</H3>
-          <button onClick={() => handleGoToNutritionalAnalysis(clientId!, diaryId, token!, navigate)} disabled={!hasValidDays}>Näringsberäkning</button>
+          <button onClick={() => handleGoToNutritionalAnalysis(clientId!, diaryId!, token!, navigate)} disabled={!hasValidDays}>Näringsberäkning</button>
           <div>
-            <button onClick={() => handleSaveAsDraft(clientId!, diaryId, token!)}>Spara som utkast</button>
+            <button onClick={() => handleSaveAsDraft(clientId!, diaryId!, token!)}>Spara som utkast</button>
             {diaryId && <button onClick={() => handleDeleteDiary(diaryId, token!, navigate)}>Ta bort hela matdagboken</button>}
           </div>
         </div>
@@ -185,7 +185,8 @@ export const FoodDiary: React.FC = () => {
                                 dayIndex,
                                 mealIndex,
                                 food.item,
-                                food.amount
+                                food.amount,
+
                               )
                             }
                           />
@@ -226,4 +227,3 @@ export const FoodDiary: React.FC = () => {
     </Wrapper>
   );
 };
-

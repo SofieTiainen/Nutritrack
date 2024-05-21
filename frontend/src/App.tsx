@@ -35,7 +35,7 @@ const router = createBrowserRouter(
         }
       />
         <Route
-        path="/nutritrack/registerfoodintake/:clientId/:diaryId?"
+        path="/nutritrack/registerfoodintake/:clientId/:diaryId"
         element={
           <PrivateRoute>
             <RegisterFoodIntake />

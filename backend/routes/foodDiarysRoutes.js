@@ -21,9 +21,20 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+const initialDays = [
+  {
+    date: new Date().toISOString().split("T")[0],
+    mealTypes: [
+      { name: "Frukost", foods: [] },
+      { name: "Lunch", foods: [] },
+      { name: "Middag", foods: [] },
+      { name: "Mellanmål 1", foods: [] },
+    ],
+  },
+];
 
 router.post('/foodDiary', authenticateToken, async (req, res) => {
-    const { clientId, days } = req.body;
+    const { clientId, days = initialDays } = req.body;
   
     try {
       const client = await Client.findById(clientId);

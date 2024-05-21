@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
 
 export interface FoodItem {
   id: string;
@@ -26,27 +26,28 @@ export interface DiaryEntry {
   entries: MealEntry[];
 }
 
+
 export interface FoodContextProps {
-  allFoodItems: FoodItem[];
-  days: Day[];
-  hiddenDays: boolean[];
-  activeMeal: { dayIndex: number; mealIndex: number; mealType: string } | null;
-  editFood: { dayIndex: number; mealIndex: number; food: FoodItem; amount: string } | null;
-  setDays: React.Dispatch<React.SetStateAction<Day[]>>;
-  setHiddenDays: React.Dispatch<React.SetStateAction<boolean[]>>;
-  setActiveMeal: React.Dispatch<React.SetStateAction<{ dayIndex: number; mealIndex: number; mealType: string } | null>>;
-  setEditFood: React.Dispatch<React.SetStateAction<{ dayIndex: number; mealIndex: number; food: FoodItem; amount: string } | null>>;
-  fetchFoodItems: () => void;
-  addNewDay: () => void;
-  handleToggleDay: (index: number) => void;
-  handleAddFood: (dayIndex: number, mealIndex: number, food: FoodItem, amount: string) => void;
-  handleEditFood: (dayIndex: number, mealIndex: number, food: FoodItem, amount: string) => void;
-  handleRemoveFood: (dayIndex: number, mealIndex: number, foodIndex: number) => void;
-  handleAddInBetweenMeal: (dayIndex: number) => void;
-  handleSaveAsDraft: (clientId: string, diaryId: string | undefined, token: string) => Promise<void>;
-  handleGoToNutritionalAnalysis: (clientId: string, diaryId: string | undefined, token: string, navigate: any) => Promise<void>;
-  handleDeleteDiary: (diaryId: string | undefined, token: string, navigate: any) => Promise<void>;
-}
+    allFoodItems: FoodItem[];
+    days: Day[];
+    hiddenDays: boolean[];
+    activeMeal: { dayIndex: number; mealIndex: number; mealType: string } | null;
+    editFood: { dayIndex: number; mealIndex: number; food: FoodItem; amount: string } | null;
+    setDays: React.Dispatch<React.SetStateAction<Day[]>>;
+    setHiddenDays: React.Dispatch<React.SetStateAction<boolean[]>>;
+    setActiveMeal: React.Dispatch<React.SetStateAction<{ dayIndex: number; mealIndex: number; mealType: string } | null>>;
+    setEditFood: React.Dispatch<React.SetStateAction<{ dayIndex: number; mealIndex: number; food: FoodItem; amount: string } | null>>;
+    fetchFoodItems: () => void;
+    addNewDay: () => void;
+    handleToggleDay: (index: number) => void;
+    handleAddFood: (dayIndex: number, mealIndex: number, food: FoodItem, amount: string) => void;
+    handleEditFood: (dayIndex: number, mealIndex: number, food: FoodItem, amount: string) => void;
+    handleRemoveFood: (dayIndex: number, mealIndex: number, foodIndex: number) => void;
+    handleAddInBetweenMeal: (dayIndex: number) => void;
+    handleSaveAsDraft: (clientId: string, diaryId: string, token: string) => Promise<void>;
+    handleGoToNutritionalAnalysis: (clientId: string, diaryId: string, token: string, navigate: any) => Promise<void>;
+    handleDeleteDiary: (diaryId: string, token: string, navigate: any) => Promise<void>;
+  }
 
 const FoodContext = createContext<FoodContextProps | undefined>(undefined);
 
@@ -66,6 +67,10 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [hiddenDays, setHiddenDays] = useState<boolean[]>([false]);
   const [activeMeal, setActiveMeal] = useState<{ dayIndex: number; mealIndex: number; mealType: string } | null>(null);
   const [editFood, setEditFood] = useState<{ dayIndex: number; mealIndex: number; food: FoodItem; amount: string } | null>(null);
+
+  useEffect(() => {
+    console.log("hidden days", hiddenDays)
+  }, [hiddenDays])
 
   const fetchFoodItems = async () => {
     let allResults: FoodItem[] = [];
@@ -115,6 +120,7 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const handleToggleDay = (index: number) => {
+    console.log("hej")
     setHiddenDays((prevHiddenDays) =>
       prevHiddenDays.map((hidden, i) => (i === index ? !hidden : hidden))
     );
@@ -149,7 +155,7 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return day;
       })
     );
-    setEditFood(null); // Reset editFood after adding/updating food
+    setEditFood(null);
   };
 
   const handleEditFood = (dayIndex: number, mealIndex: number, food: FoodItem, amount: string) => {
@@ -195,50 +201,39 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
   };
 
-  const handleSaveAsDraft = async (clientId: string, diaryId: string | undefined, token: string) => {
-    if (clientId) {
-      try {
-        const url = diaryId
-          ? `http://localhost:3000/api/foodDiary/${diaryId}`
-          : "http://localhost:3000/api/foodDiary";
-        const method = diaryId ? "put" : "post";
-        const response = await axios({
-          method,
-          url,
-          data: { clientId, days },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        alert("Matdagbok sparad");
-        console.log("responsen: ", response);
-      } catch (error) {
-        console.error("Error saving food diary:", error);
-      }
-    } else {
-      console.log("No clientID found");
+  //put
+const handleSaveAsDraft = async (clientId: string, diaryId: string, token: string) => {
+    try {
+      const url = `http://localhost:3000/api/foodDiary/${diaryId}`;
+      const response = await axios.put(url, { clientId, days }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      alert("Matdagbok sparad");
+      console.log("responsen: ", response);
+    } catch (error) {
+      console.error("Error saving food diary:", error);
     }
   };
 
-  const handleDeleteDiary = async (diaryId: string | undefined, token: string, navigate: any) => {
-    if (diaryId) {
-      try {
-        await axios.delete(`http://localhost:3000/api/foodDiary/${diaryId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        alert("Matdagbok raderad");
-        navigate('/nutritrack/dashboard');
-      } catch (error) {
-        console.error("Error deleting food diary:", error);
-      }
-    } else {
-      console.log("No diaryID found");
+
+const handleDeleteDiary = async (diaryId: string, token: string, navigate: any) => {
+    try {
+      await axios.delete(`http://localhost:3000/api/foodDiary/${diaryId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      alert("Matdagbok raderad");
+      navigate('/nutritrack/dashboard');
+    } catch (error) {
+      console.error("Error deleting food diary:", error);
     }
   };
 
-  const handleGoToNutritionalAnalysis = async (clientId: string, diaryId: string | undefined, token: string, navigate: any) => {
+
+const handleGoToNutritionalAnalysis = async (clientId: string, diaryId: string, token: string, navigate: any) => {
     const hasValidDays = days.some(day =>
       day.mealTypes.some(meal => meal.foods.length > 0)
     );
@@ -249,25 +244,6 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
-      if (!diaryId && clientId) {
-        const response = await axios.post(
-          "http://localhost:3000/api/foodDiary",
-          { clientId, days },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.status === 201) {
-          diaryId = response.data._id;
-        } else {
-          console.error("Error saving food diary:", response);
-          return;
-        }
-      }
-
       const analysisResponse = await axios.post(
         "http://localhost:3000/api/nutritionanalysis",
         { clientId, days },
@@ -333,3 +309,5 @@ export const useFood = () => {
   }
   return context;
 };
+
+
