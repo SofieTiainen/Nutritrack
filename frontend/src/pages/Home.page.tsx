@@ -5,6 +5,7 @@ import { RegisterForm } from "../components/RegisterForm";
 import { Colors } from "../styles/colors";
 
 export const HomePage = () => {
+ 
 
   return (
     <>

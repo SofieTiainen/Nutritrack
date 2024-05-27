@@ -11,7 +11,6 @@ router.post("/login", async (req, res) => {
   const { email, passWord } = req.body;
 
   if (!email || !passWord) {
-    console.log("Email and password are required");
     return res.status(400).json({ error: "Email and password are required" });
   }
 
@@ -26,14 +25,12 @@ router.post("/login", async (req, res) => {
     const passwordMatch = await bcrypt.compare(passWord, user.passWord);
 
     if (!passwordMatch) {
-      console.log("Invalid password");
       return res.status(401).json({ error: "Invalid password" });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
       expiresIn: "3h",
     });
-    console.log("Inlogg lyckades");
 
     res.status(200).json({
       token,
@@ -42,7 +39,6 @@ router.post("/login", async (req, res) => {
       email: user.email,
     });
   } catch (error) {
-    console.error("Login error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

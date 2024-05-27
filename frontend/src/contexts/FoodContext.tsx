@@ -120,7 +120,6 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const handleToggleDay = (index: number) => {
-    console.log("hej")
     setHiddenDays((prevHiddenDays) =>
       prevHiddenDays.map((hidden, i) => (i === index ? !hidden : hidden))
     );
@@ -201,7 +200,6 @@ export const FoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
   };
 
-  //put
 const handleSaveAsDraft = async (clientId: string, diaryId: string, token: string) => {
     try {
       const url = `http://localhost:3000/api/foodDiary/${diaryId}`;
@@ -225,8 +223,7 @@ const handleDeleteDiary = async (diaryId: string, token: string, navigate: any) 
           Authorization: `Bearer ${token}`,
         },
       });
-      alert("Matdagbok raderad");
-      navigate('/nutritrack/dashboard');
+      navigate("/nutritrack/clients");
     } catch (error) {
       console.error("Error deleting food diary:", error);
     }
@@ -263,7 +260,6 @@ const handleGoToNutritionalAnalysis = async (clientId: string, diaryId: string, 
               Authorization: `Bearer ${token}`,
             },
           });
-          alert("Matdagbok raderad");
         }
 
         navigate(`/nutritrack/nutritionanalysis/${clientId}/${analysisId}`);

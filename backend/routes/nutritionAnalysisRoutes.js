@@ -48,4 +48,19 @@ router.get('/nutritionanalysis/:analysisId', authenticateToken, async (req, res)
   }
 });
 
+router.get('/nutritionanalysis/client/:clientId', authenticateToken, async (req, res) => {
+  const { clientId } = req.params;
+
+  try {
+    const nutritionAnalyses = await NutritionAnalysis.find({ clientId }).populate('clientId');
+    if (!nutritionAnalyses) {
+      return res.status(404).json({ error: 'No nutrition analyses found for this client' });
+    }
+    res.status(200).json(nutritionAnalyses);
+  } catch (error) {
+    console.error('Error fetching nutrition analyses for client:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

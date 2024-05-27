@@ -67,6 +67,14 @@ export const Button = styled.button<{ $color?: string; $backgroundImageC1?: stri
   button:hover {
     border-color: #646cff;
   }
+
+  &:disabled {
+    cursor: not-allowed;
+    background-image: linear-gradient(lightgray 0%, darkgray 100%);
+    background-color: pink;
+    border-color: #ccc;
+    color: ${Colors.Gray400};
+  }
 `;
 
 export const StyledLink = styled(Link)`

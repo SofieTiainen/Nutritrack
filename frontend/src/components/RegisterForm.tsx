@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { H2, Input, Button, FlexDiv, ErrorP, P } from "../styles/global.styled";
 import {
   Form,
@@ -6,13 +5,19 @@ import {
   StyledDivTop,
   StyledDivBottom,
 } from "./registerForm.styled";
+import { Colors } from "../styles/colors";
+import { IoIosCheckmarkCircleOutline } from "react-icons/io";
 import { validateEmail, validatePassword } from "../utilities/validateUtils";
 import { Loader } from "./Loader";
-import { Colors } from "../styles/colors";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { IoIosCheckmarkCircleOutline } from "react-icons/io";
 
 export const RegisterForm = () => {
+  const [showRegSuccess, setShowRegSuccess] = useState(false);
+  const [serverError, setServerError] = useState("");
+  const [clientError, setClientError] = useState("");
+  
+
   const [buttonText, setButtonText] = useState<{
     text: string;
     loader?: JSX.Element;
@@ -29,8 +34,6 @@ export const RegisterForm = () => {
     email: "",
     passWord: "",
   });
-
-  const [showRegSuccess, setShowRegSuccess] = useState(false);
 
   useEffect(() => {
     const errors = {
@@ -49,14 +52,16 @@ export const RegisterForm = () => {
       loader: <Loader width="10px" padding="5px" color="white" />,
     });
 
+    setClientError("");
+    setServerError("");
+
     try {
       const response = await axios.post(
         "http://localhost:3000/api/auth/register",
         registerInput
       );
-      
+
       if (response.status === 201) {
-        console.log("Lyckas registrering av konto, logga in");
         setButtonText({ text: "Register" });
         setShowRegSuccess(true);
         setRegisterInput({
@@ -67,10 +72,16 @@ export const RegisterForm = () => {
         });
       }
     } catch (error: any) {
-      console.log("Registration error: ", error);
       if (error.response) {
-        console.log(error.response.data.error);
+        if (error.response.status === 400) {
+          setClientError(error.response.data.error);
+        } else if (error.response.status === 500) {
+          setServerError("Internal server error, please try again later.");
+        }
+      } else {
+        setServerError("An unexpected error occurred, please try again.");
       }
+      setButtonText({ text: "Register" });
     }
   };
 
@@ -78,6 +89,9 @@ export const RegisterForm = () => {
     const { value, name } = e.target as HTMLInputElement;
     setRegisterInput({ ...registerInput, [name]: value.trim() });
   };
+
+  const hasErrors =
+    validationErrors.email.length > 0 || validationErrors.password.length > 0;
 
   return (
     <>
@@ -111,9 +125,11 @@ export const RegisterForm = () => {
             onChange={handleChange}
           />
           {validationErrors.email.map((error, i) => (
-            <ErrorP key={i} $color="red" $padding={"0px 0px 0px 5px"}>
-              {error}
-            </ErrorP>
+            <div>
+              <ErrorP key={i} $color="red" $padding={"0px 0px 0px 5px"}>
+                {error}
+              </ErrorP>
+            </div>
           ))}
 
           <Input
@@ -129,6 +145,8 @@ export const RegisterForm = () => {
               {error}
             </ErrorP>
           ))}
+          {clientError && <ErrorP $color="red" $padding={"0px 0px 0px 5px"}>{clientError}</ErrorP>}
+          {serverError && <ErrorP $color="red" $padding={"0px 0px 0px 5px"}>{serverError}</ErrorP>}
           <Button
             style={{
               display: "flex",
@@ -136,6 +154,11 @@ export const RegisterForm = () => {
               justifyContent: "center",
               gap: "15px",
             }}
+            disabled={
+              hasErrors ||
+              registerInput.firstName === "" ||
+              registerInput.lastName === ""
+            }
             $backgroundImageC1={Colors.Gray500}
             $backgroundImageC2={Colors.Gray600}
           >
@@ -152,10 +175,7 @@ export const RegisterForm = () => {
             <P>Success!</P>
           </StyledDivTop>
           <StyledDivBottom>
-            <P>Your account has successfully been created</P>
-            <Button $marginBottom="5px" $marginTop="5px">
-              Login
-            </Button>
+            <P>Your account has successfully been created, login to continue</P>
           </StyledDivBottom>
         </SuccessMessage>
       )}

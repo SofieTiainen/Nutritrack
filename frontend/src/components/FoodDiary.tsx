@@ -10,8 +10,12 @@ import {
   ArrowDiv,
   TrashCanDiv,
   SearchBarWrapper,
+  BtnDiv,
+  FoodDiaryButton,
+  FoodUl,
+  FoodLi
 } from "./foodDiary.styled";
-import { P, H3 } from "../styles/global.styled";
+import { P, H3} from "../styles/global.styled";
 import { IoIosArrowDown } from "react-icons/io";
 import { FiPlus } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
@@ -22,13 +26,17 @@ import { useParams, useNavigate } from "react-router-dom";
 import { FaRegEdit } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import axios from "axios";
+import { Colors } from "../styles/colors";
 
 export const FoodDiary: React.FC = () => {
   const navigate = useNavigate();
-  const { clientId, diaryId } = useParams<{ clientId: string; diaryId: string }>();
+  const { clientId, diaryId } = useParams<{
+    clientId: string;
+    diaryId: string;
+  }>();
   const token = sessionStorage.getItem("token");
-  const { 
-    days, 
+  const {
+    days,
     setDays,
     hiddenDays,
     setHiddenDays,
@@ -63,12 +71,16 @@ export const FoodDiary: React.FC = () => {
     if (diaryId) {
       const fetchDiary = async () => {
         try {
-          const response = await axios.get(`http://localhost:3000/api/foodDiary/${clientId}/${diaryId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          const response = await axios.get(
+            `http://localhost:3000/api/foodDiary/${clientId}/${diaryId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
           setDays(response.data.days);
         } catch (error) {
-          console.error("Error fetching diary:", error);
+          navigate("/nutritrack/clients");
+
         }
       };
       fetchDiary();
@@ -77,7 +89,9 @@ export const FoodDiary: React.FC = () => {
     }
   }, [diaryId, clientId, token, setDays]);
 
-  const hasValidDays = days.some(day => day.mealTypes.some(meal => meal.foods.length > 0));
+  const hasValidDays = days.some((day) =>
+    day.mealTypes.some((meal) => meal.foods.length > 0)
+  );
 
   const handleDeleteDay = (index: number) => {
     setDays((prevDays) => prevDays.filter((_, i) => i !== index));
@@ -86,8 +100,11 @@ export const FoodDiary: React.FC = () => {
     );
   };
 
-
-  const handleMealClick = (dayIndex: number, mealIndex: number, mealType: string) => {
+  const handleMealClick = (
+    dayIndex: number,
+    mealIndex: number,
+    mealType: string
+  ) => {
     if (
       activeMeal?.dayIndex === dayIndex &&
       activeMeal?.mealIndex === mealIndex &&
@@ -105,8 +122,8 @@ export const FoodDiary: React.FC = () => {
         {activeMeal && (
           <>
             <P>
-              Sök på livsmedel för {activeMeal?.mealType} - Dag:{" "}
-              {days[activeMeal.dayIndex].date}
+              Sök på livsmedel för {activeMeal?.mealType} - Datum:{" "}
+              {days[activeMeal.dayIndex]?.date}
             </P>
             <SearchField
               dayIndex={activeMeal.dayIndex}
@@ -120,14 +137,40 @@ export const FoodDiary: React.FC = () => {
       </SearchBarWrapper>
 
       <FoodJournalWrapper>
-        <div>
-          <H3 style={{ textAlign: "center" }}>Matdagboken</H3>
-          <button onClick={() => handleGoToNutritionalAnalysis(clientId!, diaryId!, token!, navigate)} disabled={!hasValidDays}>Näringsberäkning</button>
-          <div>
-            <button onClick={() => handleSaveAsDraft(clientId!, diaryId!, token!)}>Spara som utkast</button>
-            {diaryId && <button onClick={() => handleDeleteDiary(diaryId, token!, navigate)}>Ta bort hela matdagboken</button>}
-          </div>
-        </div>
+      <H3 style={{ textAlign: "center" }}>Matdagboken</H3>
+        <BtnDiv>
+          <FoodDiaryButton
+            $backgroundImageC1={Colors.MintGreen400}
+            $backgroundImageC2={Colors.MintGreen500}
+            onClick={() => handleSaveAsDraft(clientId!, diaryId!, token!)}
+          >
+            Spara som utkast
+          </FoodDiaryButton>
+          {diaryId && (
+            <FoodDiaryButton
+              $backgroundImageC1={Colors.MintGreen400}
+              $backgroundImageC2={Colors.MintGreen500}
+              onClick={() => handleDeleteDiary(diaryId, token!, navigate)}
+            >
+              Radera matdagboken
+            </FoodDiaryButton>
+          )}
+          <FoodDiaryButton
+            $backgroundImageC1={Colors.MintGreen400}
+            $backgroundImageC2={Colors.MintGreen500}
+            onClick={() =>
+              handleGoToNutritionalAnalysis(
+                clientId!,
+                diaryId!,
+                token!,
+                navigate
+              )
+            }
+            disabled={!hasValidDays}
+          >
+            Näringsberäkning
+          </FoodDiaryButton>
+        </BtnDiv>
 
         {days.map((day, dayIndex) => (
           <FoodJournalDiv key={dayIndex}>
@@ -146,7 +189,10 @@ export const FoodDiary: React.FC = () => {
             {!hiddenDays[dayIndex] && (
               <OneDayDiv>
                 <div>
-                  <label htmlFor={`date-${dayIndex}`} style={{ color: "black" }}>
+                  <label
+                    htmlFor={`date-${dayIndex}`}
+                    style={{ color: "black" }}
+                  >
                     Datum:
                   </label>
                   <input
@@ -172,9 +218,9 @@ export const FoodDiary: React.FC = () => {
                       }
                     />
                     <P $fontSize="16px">{meal.name}</P>
-                    <ul>
+                    <FoodUl>
                       {meal.foods.map((food, foodIndex) => (
-                        <li key={foodIndex}>
+                        <FoodLi key={foodIndex}>
                           {food.item.namn} - {food.item.nummer} -{food.amount}{" "}
                           gram
                           <FaRegEdit
@@ -185,8 +231,7 @@ export const FoodDiary: React.FC = () => {
                                 dayIndex,
                                 mealIndex,
                                 food.item,
-                                food.amount,
-
+                                food.amount
                               )
                             }
                           />
@@ -196,9 +241,9 @@ export const FoodDiary: React.FC = () => {
                               handleRemoveFood(dayIndex, mealIndex, foodIndex)
                             }
                           />
-                        </li>
+                        </FoodLi>
                       ))}
-                    </ul>
+                    </FoodUl>
                   </MealsDiv>
                 ))}
 
@@ -213,7 +258,10 @@ export const FoodDiary: React.FC = () => {
             )}
 
             <TrashCanDiv>
-              <FaRegTrashCan color="black" onClick={() => handleDeleteDay(dayIndex)} />
+              <FaRegTrashCan
+                color="black"
+                onClick={() => handleDeleteDay(dayIndex)}
+              />
             </TrashCanDiv>
           </FoodJournalDiv>
         ))}

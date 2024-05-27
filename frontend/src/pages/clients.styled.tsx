@@ -5,14 +5,11 @@ export const ClientsWrapper = styled.div`
   background-color: ${Colors.Gold50};
   margin-bottom: 100px;
   margin-top: 100px;
-  padding: 0px 50px;
+  padding: 0px 0px;
 `;
 
 export const AddClientBtn = styled.button`
-  background-image: linear-gradient(
-    ${Colors.MintGreen300} 0%,
-    ${Colors.MintGreen400} 100%
-  );
+  background-color: ${Colors.Green100};
   border-radius: 5px;
   border: 1px solid transparent;
   font-weight: 600;
@@ -22,10 +19,13 @@ export const AddClientBtn = styled.button`
   padding: 10px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
+  font-size: 20px;
+  color: ${Colors.Green500};
 
-  button:hover {
-    border-color: #646cff;
+  &:hover {
+  color: ${Colors.Green700};
+     
   }
 `;
 
@@ -45,6 +45,6 @@ export const AddClientDiv = styled.div`
   }
 `;
 
-export const ClientsListWrapper = styled.div`
-background-color: pink;
-`
+// export const ClientsListWrapper = styled.div`
+// background-color: pink;
+// `

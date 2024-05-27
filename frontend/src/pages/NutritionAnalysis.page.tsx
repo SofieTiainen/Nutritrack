@@ -4,7 +4,7 @@ import { ShowNutritionAnalysis } from "../components/ShowNutritionAnalysis";
 export const NutritionAnalysisPage = () => {
   return (
     <NutritionAnalysisWrapper>
-      <ShowNutritionAnalysis></ShowNutritionAnalysis>
+      <ShowNutritionAnalysis />
     </NutritionAnalysisWrapper>
   );
 };

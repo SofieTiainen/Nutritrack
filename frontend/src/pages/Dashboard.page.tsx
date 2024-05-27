@@ -1,17 +1,23 @@
-import { DashboardWrapper, StyledLatestClients, StyledLatestNutritionalAnalysis, StyledLatestFoodDiarys } from "./dashboard.styled";
+import { DashboardWrapper, StyledLatestClients, StyledLatestNutritionalAnalysis, StyledLatestFoodDiarys, H1AndUserDiv, H3, LatestAnalysisUl, LatestClientsUl, LatestFoodDiaryUl, StyledLi } from "./dashboard.styled";
 import { FlexDiv } from "../styles/global.styled";
 import { H1, P } from "../styles/global.styled";
 import { Colors } from "../styles/colors";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useClients } from "../contexts/ClientContext";
 
 
 export const DashboardPage = () => {
   const {fetchClients, clientsList, fetchFoodDiaries, foodDiaries} = useClients();
+  const [userProfile, setUserProfile] = useState({ firstName: "", lastName: "", email: "" });
 
   useEffect(() => {
     fetchClients();
     fetchFoodDiaries();
+
+    const profile = localStorage.getItem("userProfile");
+    if (profile) {
+      setUserProfile(JSON.parse(profile));
+    }
   }, []);
 
   const sortedClients = [...clientsList].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -19,34 +25,38 @@ export const DashboardPage = () => {
 
     return (
         <DashboardWrapper>
-        <H1 $color={Colors.Green600}>Dashboard</H1>
+          <H1AndUserDiv>
+          <H1 $color={Colors.Green600}>Dashboard</H1>
+        <P>Inloggad som: {userProfile.firstName} {userProfile.lastName}, {userProfile.email}</P>
+          </H1AndUserDiv>
         <FlexDiv $flexdirection="column" $alignItems="center" $gap="20px" style={{width: '100%'}}>
         <StyledLatestClients>
-            <P>latest clients sorterade på createdAt
-              - länkar till klientsidan, till den clienten och dess snabblänkar till matdagbok eller näringsberäkning</P>
-            <ul style={{backgroundColor: 'pink'}}>
+            <H3>Senast tillagda klienter</H3>
+            <LatestClientsUl>
             {sortedClients.map(client => (
-              <li key={client._id} style={{color: 'black'}}>
+              <StyledLi key={client._id} style={{color: 'black'}}>
                 {client.firstName} {client.lastName} - {new Date(client.createdAt).toLocaleDateString()}
-              </li>
+              </StyledLi>
             ))}
-          </ul>
+          </LatestClientsUl>
         </StyledLatestClients>
         <StyledLatestFoodDiarys>
-          <P>Senaste matdagböckerna - länkar direkt till klientens matdagboken</P>
-          <ul style={{ backgroundColor: 'lightblue' }}>
+          <H3>Senast skapade matdagböckerna</H3>
+          <LatestFoodDiaryUl>
             {sortedFoodDiaries.map(diary => (
-              <li key={diary._id} style={{ color: 'black' }}>
+              <StyledLi key={diary._id} style={{ color: 'black' }}>
                 {diary.clientId.firstName} {diary.clientId.lastName} - {new Date(diary.createdAt).toLocaleDateString()}
-              </li>
+              </StyledLi>
             ))}
-          </ul>
+          </LatestFoodDiaryUl>
         </StyledLatestFoodDiarys>
         <StyledLatestNutritionalAnalysis>
-            <P>senaste matberäkning - länkar direkt till klientens näringsvärdesberäkningen</P>
+            <H3>Senast skapade matberäkningarna</H3>
         </StyledLatestNutritionalAnalysis>
         </FlexDiv>
         </DashboardWrapper>
         
     )
 }
+
+

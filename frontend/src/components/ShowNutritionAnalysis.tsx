@@ -1,10 +1,10 @@
-import { NutritionAnalysisWrapper, ClientInfoDiv } from "./showNutritionAnalysis.styled";
+import { NutritionAnalysisWrapper, ClientInfoDiv, InfoDiv } from "./showNutritionAnalysis.styled";
 import { CheckboxGroup } from "./CheckboxGroup";
 import { useNutritionAnalysisContext } from "../contexts/NutritionAnalysisContext";
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
-import axios from "axios";
-import { NutrientValues } from "../contexts/NutritionAnalysisContext";
+import { H1 } from "../styles/global.styled";
+import { Colors } from "../styles/colors";
 
 const checkboxLabels: { [key: string]: string } = {
   checkbox1: "Total närings - Alla måltider ihopslagna",
@@ -14,200 +14,26 @@ const checkboxLabels: { [key: string]: string } = {
 };
 
 export const ShowNutritionAnalysis = () => {
-  const { checkboxes, nutritionAnalysis, setNutritionAnalysis, fetchNutrientValues } = useNutritionAnalysisContext();
+  const { checkboxes, nutritionAnalysis, setNutritionAnalysis, fetchNutritionAnalysis, calculateTotalNutrients, calculateDailyNutrients, calculateMealNutrients, calculateFoodNutrients } = useNutritionAnalysisContext();
   const { analysisId } = useParams();
   const token = sessionStorage.getItem("token");
 
-  const fetchNutritionAnalysis = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3000/api/nutritionanalysis/${analysisId}`, 
-          {
-              headers: {
-                  Authorization: `Bearer ${token}`,
-              },
-          }
-      );
-
-      const analysisData = response.data;
-
-      for (const day of analysisData.days) {
-        for (const meal of day.mealTypes) {
-          for (const food of meal.foods) {
-            const nutrientValues = await fetchNutrientValues(food.item.nummer);
-            food.nutrients = nutrientValues;
-          }
-        }
-      }
-
-      setNutritionAnalysis(analysisData);
-    } catch (error) {
-      console.error('Error fetching nutrition analysis data:', error);
+  useEffect(() => {
+    if (analysisId && token) {
+      fetchNutritionAnalysis(analysisId, token);
     }
-  };
-
-  const calculateTotalNutrients = () => {
-    if (!nutritionAnalysis) return {};
-
-    const totalNutrients: NutrientValues = {};
-    let dayCount = 0;
-
-    for (const day of nutritionAnalysis.days) {
-      dayCount++;
-      for (const meal of day.mealTypes) {
-        for (const food of meal.foods) {
-          if (food.nutrients) {
-            const amountFactor = parseFloat(food.amount) / 100;
-
-            if (isNaN(amountFactor)) {
-              console.warn(`Invalid amount for food ${food.item.namn}: ${food.amount}`);
-              continue;
-            }
-
-            for (const nutrient of food.nutrients) {
-              const nutrientValue = nutrient.varde;
-              if (isNaN(nutrientValue)) {
-                console.warn(`Invalid nutrient value for ${nutrient.namn} in food ${food.item.namn}: ${nutrient.varde}`);
-                continue;
-              }
-
-              const adjustedNutrientValue = nutrientValue * amountFactor;
-
-              if (totalNutrients[nutrient.namn]) {
-                totalNutrients[nutrient.namn].value += adjustedNutrientValue;
-              } else {
-                totalNutrients[nutrient.namn] = {
-                  value: adjustedNutrientValue,
-                  unit: nutrient.enhet
-                };
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // Calculate average per day
-    for (const nutrientName in totalNutrients) {
-      totalNutrients[nutrientName].value /= dayCount;
-    }
-
-    return totalNutrients;
-  };
-
-  const calculateDailyNutrients = () => {
-    if (!nutritionAnalysis) return [];
-
-    return nutritionAnalysis.days.map(day => {
-      const dailyNutrients: NutrientValues = {};
-
-      for (const meal of day.mealTypes) {
-        for (const food of meal.foods) {
-          if (food.nutrients) {
-            const amountFactor = parseFloat(food.amount) / 100;
-
-            if (isNaN(amountFactor)) {
-              console.warn(`Invalid amount for food ${food.item.namn}: ${food.amount}`);
-              continue;
-            }
-
-            for (const nutrient of food.nutrients) {
-              const nutrientValue = nutrient.varde;
-              if (isNaN(nutrientValue)) {
-                console.warn(`Invalid nutrient value for ${nutrient.namn} in food ${food.item.namn}: ${nutrient.varde}`);
-                continue;
-              }
-
-              const adjustedNutrientValue = nutrientValue * amountFactor;
-
-              if (dailyNutrients[nutrient.namn]) {
-                dailyNutrients[nutrient.namn].value += adjustedNutrientValue;
-              } else {
-                dailyNutrients[nutrient.namn] = {
-                  value: adjustedNutrientValue,
-                  unit: nutrient.enhet
-                };
-              }
-            }
-          }
-        }
-      }
-
-      return dailyNutrients;
-    });
-  };
-
-  const calculateMealNutrients = () => {
-    if (!nutritionAnalysis) return [];
-
-    return nutritionAnalysis.days.map(day =>
-      day.mealTypes.map(meal => {
-        const mealNutrients: NutrientValues = {};
-
-        for (const food of meal.foods) {
-          if (food.nutrients) {
-            const amountFactor = parseFloat(food.amount) / 100;
-
-            if (isNaN(amountFactor)) {
-              console.warn(`Invalid amount for food ${food.item.namn}: ${food.amount}`);
-              continue;
-            }
-
-            for (const nutrient of food.nutrients) {
-              const nutrientValue = nutrient.varde;
-              if (isNaN(nutrientValue)) {
-                console.warn(`Invalid nutrient value for ${nutrient.namn} in food ${food.item.namn}: ${nutrient.varde}`);
-                continue;
-              }
-
-              const adjustedNutrientValue = nutrientValue * amountFactor;
-
-              if (mealNutrients[nutrient.namn]) {
-                mealNutrients[nutrient.namn].value += adjustedNutrientValue;
-              } else {
-                mealNutrients[nutrient.namn] = {
-                  value: adjustedNutrientValue,
-                  unit: nutrient.enhet
-                };
-              }
-            }
-          }
-        }
-
-        return { mealName: meal.name, nutrients: mealNutrients };
-      })
-    );
-  };
-
-  const calculateFoodNutrients = () => {
-    if (!nutritionAnalysis) return [];
-
-    return nutritionAnalysis.days.map(day =>
-      day.mealTypes.map(meal =>
-        meal.foods.map(food => ({
-          foodName: food.item.namn,
-          amount: food.amount,
-          nutrients: food.nutrients
-        }))
-      )
-    );
-  };
+  }, [analysisId, token]);
 
   const totalNutrients = calculateTotalNutrients();
   const dailyNutrients = calculateDailyNutrients();
   const mealNutrients = calculateMealNutrients();
   const foodNutrients = calculateFoodNutrients();
 
-  useEffect(() => {
-    if(analysisId) {
-    fetchNutritionAnalysis();
-    }
-  }, [analysisId]);
-
   return (
     <NutritionAnalysisWrapper>
-      <h1 style={{ color: 'black' }}>Nutritionsberäkning</h1>
+      <H1 style={{ marginLeft: '15px' }} $color={Colors.Green600}>Näringsanalys</H1>
       <CheckboxGroup />
-      <div>
+      <InfoDiv>
         <h2>Beräkning för:</h2>
         <ul>
           {Object.entries(checkboxes).map(([key, value]) => (
@@ -293,7 +119,7 @@ export const ShowNutritionAnalysis = () => {
             )}
           </div>
         )}
-      </div>
+      </InfoDiv>
     </NutritionAnalysisWrapper>
   );
 };

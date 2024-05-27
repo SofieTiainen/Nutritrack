@@ -1,8 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
 import { Loader } from "./Loader";
-import { Form } from "./addClienForm.styled";
-import { H2, Input, Button, FlexDiv } from "../styles/global.styled";
+import { Form, StyledSelect } from "./addClienForm.styled";
+import { H2, Input, Button, FlexDiv, ErrorP } from "../styles/global.styled";
 import { RxCross1 } from "react-icons/rx";
 import { Colors } from "../styles/colors";
 import { useClients } from "../contexts/ClientContext";
@@ -13,6 +13,7 @@ interface AddClientFormProps {
 
 export const AddClientForm = ({ toggleAddClient }: AddClientFormProps) => {
   const { addClient } = useClients();
+  const [errorMessage, setErrorMessage] = useState("");
   const [buttonText, setButtonText] = useState<{ text: string; loader?: JSX.Element }>({ text: "Add" });
   const [addClientInput, setAddClientInput] = useState({
     firstName: "",
@@ -60,7 +61,12 @@ export const AddClientForm = ({ toggleAddClient }: AddClientFormProps) => {
         }, 2000);
       }
     } catch (error: any) {
-      console.log("Error add client", error);
+      if(error.response && error.response.data && error.response.data.error) {
+        setErrorMessage(error.response.data.error)
+      } else {
+        setErrorMessage("An unexpected error occurred. Please try again.");
+      }
+      setButtonText({ text: "Add" });
     }
   };
 
@@ -115,7 +121,7 @@ export const AddClientForm = ({ toggleAddClient }: AddClientFormProps) => {
           onChange={handleChange}
         />
 
-        <select
+        <StyledSelect
           required
           name="gender"
           value={addClientInput.gender}
@@ -124,9 +130,9 @@ export const AddClientForm = ({ toggleAddClient }: AddClientFormProps) => {
           <option value="">Gender</option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>
-        </select>
+        </StyledSelect>
 
-        <select
+        <StyledSelect
           name="ageMonths"
           id="ageMonths"
           value={addClientInput.ageMonths ?? ""}
@@ -139,9 +145,9 @@ export const AddClientForm = ({ toggleAddClient }: AddClientFormProps) => {
               {month} {month === 1 ? "month" : "months"}
             </option>
           ))}
-        </select>
+        </StyledSelect>
 
-        <select
+        <StyledSelect
           name="ageYears"
           id="ageYears"
           value={addClientInput.ageYears ?? ""}
@@ -154,7 +160,13 @@ export const AddClientForm = ({ toggleAddClient }: AddClientFormProps) => {
               {year} {year === 1 ? "year" : "years"}
             </option>
           ))}
-        </select>
+        </StyledSelect>
+
+        {errorMessage && (
+          <ErrorP $color="red" $padding={"0px 0px 0px 5px"}>
+            {errorMessage}
+          </ErrorP>
+        )}
 
         <Button
           $backgroundImageC1={Colors.Gray500}

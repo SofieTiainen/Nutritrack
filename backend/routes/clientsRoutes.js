@@ -9,7 +9,6 @@ const router = express.Router();
 
 const authenticateToken = (req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
-  console.log("token", token)
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
@@ -28,7 +27,7 @@ router.post("/clients", authenticateToken, async (req, res) => {
       .json({ error: "First name, last name, email and gender are required" });
   }
   if ((ageYears === undefined || ageYears === null) && (ageMonths === undefined || ageMonths === null)) {
-    return res.status(400).json({ error: 'Either age in years or age in months is required' });
+    return res.status(400).json({ error: 'Either age in years or age in months are required' });
   }
 
   if ((ageYears !== undefined && ageYears !== null) && (ageMonths !== undefined && ageMonths !== null)) {

@@ -1,7 +1,9 @@
 import { IoSearchOutline } from "react-icons/io5";
-import { StyledSearchField, SearchDiv } from "./searchField.styled";
+import { StyledSearchField, SearchDiv, SearchUl, SearchLi, FoodInput, SelectedFoodWrapper, InputAndBtnWrapper } from "./searchField.styled";
+import { P, Button } from "../styles/global.styled";
 import { useState, useEffect } from "react";
 import { useFood, FoodItem } from "../contexts/FoodContext";
+import { Colors } from "../styles/colors";
 
 interface SearchFieldProps {
   dayIndex: number;
@@ -71,34 +73,36 @@ export const SearchField: React.FC<SearchFieldProps> = ({
       />
       <IoSearchOutline
         color="black"
-        style={{ position: "absolute", left: "10px" }}
+        style={{ position: "absolute", left: "500px", top: '10px' }}
       />
-      <ul>
+      <SearchDiv>
         {searchResults.length > 0 && (
           <>
-            <ul>
+            <SearchUl>
                 {searchResults.map((food, index) => (
-                    <li key={index} style={{color:'black'}} onClick={() => handleSelectFood(food)}>
+                    <SearchLi key={index} style={{color:'black'}} onClick={() => handleSelectFood(food)}>
                         {food.namn} - {food.nummer}
-                    </li>
+                    </SearchLi>
                 ))}
-            </ul>
+            </SearchUl>
           </>
         )}
-      </ul>
+      </SearchDiv>
       {selectedFood && (
-        <div>
-          <p>
+        <SelectedFoodWrapper>
+          <P style={{margin: '0px'}}>
             {selectedFood.namn} - {selectedFood.nummer}
-          </p>
-          <input
+          </P>
+          <InputAndBtnWrapper>
+          <FoodInput
             type="text"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Ange mängd i gram"
           />
-          <button onClick={handleAddFood}>{editFood ? "Uppdatera livsmedel" : "Lägg till i matdagbok"}</button>
-        </div>
+          <Button $backgroundImageC1={Colors.MintGreen400} $backgroundImageC2={Colors.MintGreen500} onClick={handleAddFood}>{editFood ? "Uppdatera livsmedel" : "Lägg till"}</Button>
+          </InputAndBtnWrapper>
+        </SelectedFoodWrapper>
       )}
     </SearchDiv>
   );
